@@ -27,9 +27,7 @@ const TableInvetories = () => {
   }, [debouncedSearchTerm, dispatch]);
 
   // Handle loading state
-  if (Loading) {
-    return <div>Loading...</div>;
-  }
+
 
   // Handle error state
   if (Error) {
@@ -45,6 +43,7 @@ const TableInvetories = () => {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
+      {!Loading ? <div>
       <Table>
         <thead>
           <tr>
@@ -71,7 +70,7 @@ const TableInvetories = () => {
               </tr>
             ))}
         </tbody>
-      </Table>
+      </Table></div>:"Loading....."}
     </Container>
   );
 };

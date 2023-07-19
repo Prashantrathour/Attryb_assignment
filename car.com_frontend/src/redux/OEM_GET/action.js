@@ -4,16 +4,11 @@ import { GET_FAILURE_OEM, GET_REQUEST_OEM, GET_SUCCESS_OEM } from "./actiontype"
 export const getOEM=(query)=>async(dispatch)=>{
     console.log('calling')
 const accessToken=localStorage.getItem("token")
-    const config={
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-          }
-    }
 try {
     dispatch(get_oem_req())
    
     
-    const response=await axios.get(`${"https://pleasant-snaps-elk.cyclic.app"}/OEM_spaces/getspecs?search=${query}`)
+    const response=await axios.get(`${process.env.REACT_APP_BASEURL}/OEM_spaces/getspecs?search=${query}`)
 dispatch(get_oem_success(response.data))
 console.log(response)
 } catch (error) {

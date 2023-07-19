@@ -27,6 +27,7 @@ const Login = () => {
       const response = await axios.post(process.env.REACT_APP_BASEURL + "/users/Login", formData);
       console.log(response)
     localStorage.setItem("token",response.data.token)
+    localStorage.setItem("userid",response.data.userID)
       setLoading(false);
       succesAlert(response.data.msg);
       navigate("/")

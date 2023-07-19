@@ -27,6 +27,7 @@ console.log(oemdata)
   
   const [selectedColor, setSelectedColor] = useState('');
   const [search, setsearch] = useState('');
+  const [update, setupdate] = useState(false);
   const [sortOption, setSortOption] = useState('');
 
   const applyFilterAndSort = () => {
@@ -46,7 +47,11 @@ console.log(oemdata)
     dispatch(getInvetory(query));
   };
   const handlesearch=()=>{
-    dispatch(getOEM(search))
+    if(search){
+      dispatch(getOEM(search))
+      setupdate(true)
+
+    }
   }
   useEffect(() => {
     applyFilterAndSort();
@@ -91,12 +96,14 @@ navigate("/addinventory")
               <option value="mileage-desc">Mileage (High to Low)</option>
             </select>
             <button onClick={Addenvaintory}>Add inventory</button>
-      <div>
-            <input onChange={(e)=>setsearch(e.target.value)} type="text" placeholder='Search by model ,color and year'/>
+      <div style={{display:"flex"}}>
+            <input style={{width:"200px"}} onChange={(e)=>setsearch(e.target.value)} type="text" placeholder='Search by model ,color and year'/>
             <button onClick={handlesearch}>Search</button>
         </div>
           </div>
-               { oemdata.length>0? <div className={styles.search}>
+          {update?<div style={{display:"inline-block",float:"right",marginRight:"10px"}} ><button onClick={()=>setupdate(false)}>close</button></div>:""}
+               { oemdata.length>0&&update? <div className={styles.search}>
+
                     {oemdata.map((item)=><OEM_card {...item}/>)}
                 </div>:""} 
           <div className={styles['inventory-container']}>

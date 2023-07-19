@@ -3,8 +3,12 @@ import { styled } from "styled-components";
 import "./addinvetory.css";
 import styles from "./addinvetory.css";
 import TableInvetories from "./TableInvetories";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { postInvetory, post_inv_req, post_inv_success } from "../redux/postInvetory/action";
+import { errorAlert, succesAlert } from "../components/Notifications";
+import { formToJSON } from "axios";
+import { ToastContainer } from "react-toastify";
 
 const AddInventoryPage = () => {
 
@@ -49,7 +53,10 @@ const Right = styled.div`
 export default AddInventoryPage;
 
 const AddInventoryForm = () => {
+  const dispatch=useDispatch()
+  
   const { oemdata, Loading, Error } = useSelector((store) => store.oemReducer);
+  const { isLoading, isError } = useSelector((store) => store.postinvetoryReducer);
   const [formData, setFormData] = useState({});
   const [id, setid] = useState("");
   const handleChange = (e) => {
@@ -57,15 +64,25 @@ const AddInventoryForm = () => {
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    // Here, you can submit the formData to your backend or perform other actions.
+   try {
+    dispatch(post_inv_req())
+    console.log(formData)
+    const res=await dispatch(postInvetory(formData))
+    console.log(res)
+    dispatch(post_inv_success())
+    succesAlert(res.data.msg)
+   } catch (error) {
+    console.log(error)
+    errorAlert(error.response.data.msg)
+   }
    
   };
 
   return (
     <FormContainer>
-      <h2>Add Inventory</h2>
+     
       <Form onSubmit={handleSubmit}>
         <FormGroup>
           <Label>KM:</Label>
@@ -74,6 +91,7 @@ const AddInventoryForm = () => {
             name="km"
             value={formData.km}
             onChange={handleChange}
+            required
           />
         </FormGroup>
 
@@ -83,6 +101,7 @@ const AddInventoryForm = () => {
             name="majorScratches"
             value={formData.majorScratches}
             onChange={handleChange}
+            required
           >
             <option value="No">No</option>
             <option value="Yes">Yes</option>
@@ -96,6 +115,7 @@ const AddInventoryForm = () => {
             name="price"
             value={formData.price}
             onChange={handleChange}
+            required
           />
         </FormGroup>
 
@@ -105,6 +125,7 @@ const AddInventoryForm = () => {
             name="originalPaint"
             value={formData.originalPaint}
             onChange={handleChange}
+            required
           >
             <option value="Yes">Yes</option>
             <option value="No">No</option>
@@ -118,6 +139,7 @@ const AddInventoryForm = () => {
             name="accidents"
             value={formData.accidents}
             onChange={handleChange}
+            required
           />
         </FormGroup>
 
@@ -128,6 +150,7 @@ const AddInventoryForm = () => {
             name="prevBuyers"
             value={formData.prevBuyers}
             onChange={handleChange}
+            required
           />
         </FormGroup>
 
@@ -138,12 +161,13 @@ const AddInventoryForm = () => {
             name="registrationPlace"
             value={formData.registrationPlace}
             onChange={handleChange}
+            required
           />
         </FormGroup>
 
         <FormGroup>
           <Label>Select car </Label>
-          <select name="oemId" onChange={handleChange} value={formData.oemId}>
+          <select required name="oemId" onChange={handleChange} value={formData.oemId}>
             {oemdata.map((i) => (
               <option value={i._id}>{i.make}</option>
             ))}
@@ -157,6 +181,7 @@ const AddInventoryForm = () => {
             name="img"
             value={formData.img}
             onChange={handleChange}
+            required
           />
         </FormGroup>
 
@@ -167,10 +192,11 @@ const AddInventoryForm = () => {
             name="title"
             value={formData.title}
             onChange={handleChange}
+            required
           />
         </FormGroup>
-
-        <Button type="submit">Add Inventory</Button>
+<ToastContainer/>
+        <Button disabled={isLoading} type="submit">{!isLoading?"Add Inventory":"Loading..."}</Button>
       </Form>
     </FormContainer>
   );
@@ -179,6 +205,8 @@ const AddInventoryForm = () => {
 const FormContainer = styled.div`
   max-width: 400px;
   margin: 0 auto;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  padding:10px ;
 `;
 
 const Form = styled.form`

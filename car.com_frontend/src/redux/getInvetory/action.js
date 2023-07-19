@@ -13,7 +13,7 @@ try {
     dispatch(get_inv_req())
     console.log(query,"filter=mileage&order=desc")
     
-    const response=await axios.get(`${"https://pleasant-snaps-elk.cyclic.app"}/inventory/${query}`,config)
+    const response=await axios.get(`${process.env.REACT_APP_BASEURL}/inventory/${query}`,config)
 dispatch(get_inv_success(response.data.deals))
 console.log(response.data.deals)
 } catch (error) {
