@@ -12,9 +12,9 @@ const { OEM_SpecsRouter } = require("./routers/OEM_Specs.router");
 const { invetoryRouter } = require("./routers/market_Inventry");
 env.config()
 app.use(cookieParser());
+app.use("/users",userRouter)
 app.use("/OEM_spaces",OEM_SpecsRouter)
 app.use("/",invetoryRouter)
-app.use("/users",userRouter)
 
 
 app.listen(process.env.PORT, async()=>{
