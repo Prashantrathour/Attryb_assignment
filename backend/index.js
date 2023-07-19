@@ -7,12 +7,13 @@ app.use(express.json())
 const env=require("dotenv")
 const { userRouter } = require("./routers/user.router")
 const connection = require("./config/db");
-const { marketplaceInventoryRouter } = require("./routers/market_Inventry");
+
 const { OEM_SpecsRouter } = require("./routers/OEM_Specs.router");
+const { invetoryRouter } = require("./routers/market_Inventry");
 env.config()
 app.use(cookieParser());
 app.use("/OEM_spaces",OEM_SpecsRouter)
-app.use("/market-inventry",marketplaceInventoryRouter)
+app.use("/",invetoryRouter)
 app.use("/users",userRouter)
 
 

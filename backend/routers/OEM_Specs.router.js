@@ -2,28 +2,33 @@ const express = require("express");
 const { oemModels } = require("../models/OEM_Specs.model");
 const OEM_SpecsRouter = express.Router();
 
-OEM_SpecsRouter.get("/", async (req, res) => {
+OEM_SpecsRouter.get("/getspecs", async (req, res) => {
+  const { search } = req.query;
   try {
-    const queryParams = req.query;
-    const caseInsensitiveQueryParams = {};
+    if (search) {
+      const searchQuery = {
+        $or: [
+          { make: { $regex: search, $options: "i" } },
+          { available_colors: { $regex: search, $options: "i" } },
+        ],
+      };
 
-    for (const key in queryParams) {
-      if (Object.hasOwnProperty.call(queryParams, key)) {
-        if (key === "year") {
-          caseInsensitiveQueryParams[key] = parseInt(queryParams[key]);
-        } else {
-          caseInsensitiveQueryParams[key] = new RegExp(queryParams[key], "i");
-        }
+      // Check if "search" is a valid number before adding to the search query
+      const numericSearch = Number(search);
+      if (!isNaN(numericSearch)) {
+        // Update the "year" field query to use $eq for exact matching
+        searchQuery.$or.push({ year: numericSearch });
       }
-    }
 
-    const OEM_Specs = await oemModels.find(caseInsensitiveQueryParams);
-    const OEM_Specs_count = await oemModels.find(caseInsensitiveQueryParams).count();
-    res.status(200).json({OEM_Specs,OEM_Specs_count});
+      let specs = await oemModels.find(searchQuery);
+      res.status(200).send(specs);
+    } else {
+      let specs = await oemModels.find({});
+      res.send(specs);
+    }
   } catch (error) {
-    res.status(404).json({ msg: error.message });
+    res.send({ error });
   }
 });
-
 
 module.exports = { OEM_SpecsRouter };

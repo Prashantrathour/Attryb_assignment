@@ -1,16 +1,25 @@
-const mongoose=require("mongoose")
-const express=require("express")
+const mongoose = require("mongoose");
+const express = require("express");
+const { oemModels } = require("./OEM_Specs.model");
+const { userModel } = require("./user.model");
 // const marketplaceInventoryRouter=express.Router()
 
-    const marketplaceInventorySchema =  mongoose.Schema({
-       
-        kms_on_odometer: { type: Number, required: true },
-        major_scratches: { type: Boolean, required: true },
-        original_paint: { type: Boolean, required: true },
-        accidents_reported: { type: Number, required: true },
-        num_previous_buyers: { type: Number, required: true },
-        registration_place: { type: String, required: true },
-        userID:String
-      });
-      const marketplaceInventoryModel=mongoose.model("Marketplace_Inventory",marketplaceInventorySchema)
-      module.exports={marketplaceInventoryModel}
+const marketplaceInventorySchema = mongoose.Schema({
+  km: { type: Number, required: true },
+  majorScratches: { required: true, type: String },
+  price: { required: true, type: Number },
+  orginalPaint: { required: true, type: String },
+  accidents: { required: true, type: Number },
+  prevBuyers: { required: true, type: Number },
+  registrationPlace: { required: true, type: String },
+  oemId: { type: mongoose.Schema.Types.ObjectId, ref: oemModels },
+  userID: { type: mongoose.Schema.Types.ObjectId, ref: userModel },
+  img: { type: String, required: true },
+  title: { type: String, required: true },
+  des: { type: Array, required: true },
+});
+const InventoryModel = mongoose.model(
+  "Marketplace_Inventory",
+  marketplaceInventorySchema
+);
+module.exports = { InventoryModel };
