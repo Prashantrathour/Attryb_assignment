@@ -26,10 +26,8 @@ const TableInvetories = () => {
     dispatch(getOEM(debouncedSearchTerm));
   }, [debouncedSearchTerm, dispatch]);
 
-  // Handle loading state
 
 
-  // Handle error state
   if (Error) {
     return <div>Error: {Error}</div>;
   }
@@ -56,7 +54,7 @@ const TableInvetories = () => {
         </thead>
         <tbody>
           {Array.isArray(oemdata) &&
-            oemdata.map((item, index) => (
+            oemdata?.map((item, index) => (
               <tr key={index}>
                 <td>{item.make}</td>
                 <td>{item.model}</td>

@@ -7,6 +7,8 @@ const accessToken=localStorage.getItem("token")
     const config={
         headers: {
             Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+      'mode': 'no-cors'
           }
     }
 try {

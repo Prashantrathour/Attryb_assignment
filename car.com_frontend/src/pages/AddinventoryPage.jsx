@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { postInvetory, post_inv_req, post_inv_success } from "../redux/postInvetory/action";
 import { errorAlert, succesAlert } from "../components/Notifications";
-import { formToJSON } from "axios";
+
 import { ToastContainer } from "react-toastify";
 
 const AddInventoryPage = () => {
@@ -53,6 +53,7 @@ const Right = styled.div`
 export default AddInventoryPage;
 
 const AddInventoryForm = () => {
+  const navigate=useNavigate()
   const dispatch=useDispatch()
   
   const { oemdata, Loading, Error } = useSelector((store) => store.oemReducer);
@@ -73,13 +74,24 @@ const AddInventoryForm = () => {
     console.log(res)
     dispatch(post_inv_success())
     succesAlert(res.data.msg)
+    setTimeout(() => {
+      navigate("/")
+      
+    }, 4000);
    } catch (error) {
     console.log(error)
     errorAlert(error.response.data.msg)
    }
    
   };
+useEffect(()=>{
+  const userid=localStorage.getItem("userid");
+  const token=localStorage.getItem("token");
+  if(!userid|| !token){
+    navigate("/login")
 
+  }
+},[])
   return (
     <FormContainer>
      
@@ -103,6 +115,7 @@ const AddInventoryForm = () => {
             onChange={handleChange}
             required
           >
+            <option value="">--Select--</option>
             <option value="No">No</option>
             <option value="Yes">Yes</option>
           </Select>
@@ -127,6 +140,7 @@ const AddInventoryForm = () => {
             onChange={handleChange}
             required
           >
+             <option value="">--Select--</option>
             <option value="Yes">Yes</option>
             <option value="No">No</option>
           </Select>
@@ -168,9 +182,10 @@ const AddInventoryForm = () => {
         <FormGroup>
           <Label>Select car </Label>
           <select required name="oemId" onChange={handleChange} value={formData.oemId}>
-            {oemdata.map((i) => (
+          <option value="">--Select--</option>
+           {oemdata?.map((i) => (
               <option value={i._id}>{i.make}</option>
-            ))}
+            ))} 
           </select>
         </FormGroup>
 

@@ -1,4 +1,4 @@
-/* allinventory.module.css */
+
 
 .filter-options {
     display: grid;
@@ -7,6 +7,7 @@
     align-items: center;
     margin-bottom: 20px;
     max-width: 700px;
+    margin: 10px;
   }
   
   .filter-options select {
@@ -24,16 +25,16 @@
   
   .inventory-container {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-gap: 20px;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 7px;
+ margin-top: 10px;
  
-    margin: 20px;
      box-sizing: border-box;
   }
   .main_Container{
     box-sizing: border-box;
     width: 100%;
-      border: 1px solid red;
+
       margin-top: 10px;
   }
  .search{
@@ -43,4 +44,7 @@
   width: 100%;
   
  }
-  
+ 
+
+
+

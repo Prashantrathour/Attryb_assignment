@@ -7,13 +7,15 @@ const accessToken=localStorage.getItem("token")
     const config={
         headers: {
             Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+             'mode': 'no-cors'
           }
     }
 try {
     dispatch(get_inv_req())
     console.log(query,"filter=mileage&order=desc")
     
-    const response=await axios.get(`${process.env.REACT_APP_BASEURL}/inventory/${query}`,config)
+    const response=await axios.get(`${process.env.REACT_APP_BASEURL}/inventory/${query?`${query}`:""}`,config)
 dispatch(get_inv_success(response.data.deals))
 console.log(response.data.deals)
 } catch (error) {

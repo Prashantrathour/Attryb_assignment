@@ -214,7 +214,7 @@ const InventoryCard = ({
       />
       <InventoryTitle>{title}</InventoryTitle>
       <PriceText>
-        <strong>Price:</strong> ${price} miles
+        <strong>Price:</strong> ${price} 
       </PriceText>
       <ManufacturerText>
         <strong>Manufacturer:</strong> {oemId.make}
@@ -257,8 +257,10 @@ const InventoryCard = ({
           </p>
           <AvailableColors>
             <strong>Available Colors:</strong>
-            {oemId.available_colors.map((color, index) => (
-              <ColorCircle key={index} color={color} />
+            {oemId.available_colors.map((color, colorIndex) => (
+              <ColorCircle key={colorIndex} style={{ backgroundColor: color.toLowerCase() }} />
+      
+              
             ))}
           </AvailableColors>
         </Details>
