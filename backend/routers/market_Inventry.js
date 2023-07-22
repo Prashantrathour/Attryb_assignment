@@ -10,7 +10,7 @@ invetoryRouter.post("/inventory", async (req, res) => {
     await newInventoryModal.save();
     res.status(200).send({ msg: "Deal Added Successs" });
   } catch (error) {
-    res.send({ error });
+    res.status(404).send({ msg:"geting error while posting" });
   }
 });
 
@@ -20,6 +20,15 @@ invetoryRouter.post("/inventory", async (req, res) => {
 invetoryRouter.get("/inventory", async (req, res) => {
   // const search="Honda"
   const { order, filter, search } = req.query;
+if( !order || !filter ){
+  let deals = await InventoryModel.find({}).populate({
+    path: "oemId",
+  });
+
+  res.status(200).json({ deals });
+  return
+}
+
   try {
     if (filter === "price") {
       let deals;
@@ -39,19 +48,58 @@ invetoryRouter.get("/inventory", async (req, res) => {
 
       res.status(200).send({ deals });
     } else if (filter == "mileage") {
-      let deals = await InventoryModel.find({}).populate("oemId").lean();
-
-      if (order == "desc") {
-        //if data order is descegin and filter is mileage than we are populated the oem model so that
-        //we can get the desired mileage data from the realation oemId and sort on the basis of the data
-        //this will lean the data in plain js object and after sorting we can send to frontend
-
-        deals.sort((a, b) => b.oemId.mileage_miles - a.oemId.mileage_miles);
-      } else {
-        deals.sort((a, b) => a.oemId.mileage_miles - b.oemId.mileage_miles);
+   
+     
+      async function getDeals(sortOrder) {
+         sortOrder = order === 'desc' ? -1 : 1;
+        try {
+          const pipeline = [
+            // Sorting the data in descending order based on the 'mileage_miles' field
+            { $sort: { 'oemId.mileage_miles':  sortOrder} },
+      
+            // Performing the $lookup to populate the 'oemId' field
+            {
+              $lookup: {
+                from: 'oem_specs',
+                localField: 'oemId',
+                foreignField: '_id',
+                as: 'oemData'
+              }
+            },
+      
+            // Unwinding the 'oemData' array to get a single document
+            { $unwind: '$oemData' },
+      
+            // Sorting the data in ascending order based on the 'mileage_miles' field
+            { $sort: { 'oemData.mileage_miles': sortOrder} }
+          ];
+      
+          const sortedDeals = await InventoryModel.aggregate(pipeline);
+     
+          res.status(200).send({ deals:sortedDeals });
+        } catch (err) {
+          console.error(err);
+         
+        }
       }
 
-      res.status(200).send({ deals });
+
+
+      if (order == "desc") {
+        getDeals("desc")
+     
+        // deals.sort((a, b) => b.oemId.mileage_miles - a.oemId.mileage_miles);
+      } else {
+        getDeals("asc")
+        // deals.sort((a, b) => a.oemId.mileage_miles - b.oemId.mileage_miles);
+      }
+
+
+
+
+
+
+      
     } else if (filter === "colors") {
       //this is used for colors filter as we have populated oemId and mathing the colors with regex query
       //having opitons i which enable case sensitive searching
@@ -69,10 +117,10 @@ invetoryRouter.get("/inventory", async (req, res) => {
         path: "oemId",
       });
 
-      res.status(200).send({ deals });
+      res.status(200).json({ deals });
     }
   } catch (error) {
-    res.status(500).send({ msg: error.message });
+    res.status(500).json({ msg: error.message });
   }
 });
 
@@ -105,16 +153,24 @@ invetoryRouter.patch("/inventory/:id", async (req, res) => {
   }
 });
 
-//delete particular inventory route to deleteing the document by finding by id 
+//delete particular inventories route to deleteing the document by finding by ids 
+invetoryRouter.post("/delete", function(req, res) {
+  console.log(req.body)
+  res.json({res:req.body})
+})
+invetoryRouter.delete("/inventory/:ids", async (req, res) => {
 
-invetoryRouter.delete("/inventory/:id", async (req, res) => {
-  const { id } = req.params;
+  const idsTodelete=req.params.ids.split(",")  //geting string and split for convert array
+  if(!idsTodelete){
+    res.status(404).send({ msg:"enter ids to delete" });
+  }
 
   try {
-    await InventoryModel.findByIdAndDelete(id);
-    res.status(200).send({ msg: "Deleted Deal Success" });
+    const result = await InventoryModel.deleteMany({ _id: { $in: idsTodelete } });
+   
+    res.status(200).send({ msg: "Inventory deleted successfully.",count:result.deletedCount });
   } catch (error) {
-    res.status(500).send({ msg: error.message });
+    res.status(404).send({ msg: error.message });
   }
 });
 

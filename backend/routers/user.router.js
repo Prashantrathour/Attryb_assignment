@@ -2,10 +2,10 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { userModel } = require("../models/user.model");
-
+const cors=require("cors")
 require("dotenv").config();
 const userRouter = express.Router();
-
+userRouter.use(cors())
 userRouter.post("/register", async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
   if (!firstName||!lastName||!email || !password) {
@@ -82,7 +82,7 @@ userRouter.post("/login", async (req, res) => {
           process.env.SECRATE_KEY
         );
         res.cookie("token", token, { httpOnly: true });
-        res.json({ msg: "Logged In!", token, user: user.firstName });
+        res.json({ msg: "Logged In!", token, user:`${ user.firstName} ${ user.lastName}`,userID:user._id });
         // console.log(res)
       } else {
         res.status(401).json({ msg: "Wrong Credentials" });

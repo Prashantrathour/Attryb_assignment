@@ -1,45 +1,74 @@
-import styles from './allinvantory.module.css';
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import InventoryCard from '../components/InventorycardPage';
-import { getInvetory } from '../redux/getInvetory/action';
-import { getOEM } from '../redux/OEM_GET/action';
-import OEM_card from '../components/OEM_card';
-import { useNavigate } from 'react-router-dom';
-import Loader from '../components/Loader';
+import styles from "./allinvantory.module.css";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import InventoryCard from "../components/InventorycardPage";
+import {
+  getInvetory,
+  get_inv_success_prevent_reffresh,
+} from "../redux/getInvetory/action";
+import { getOEM } from "../redux/OEM_GET/action";
+import OEM_card from "../components/OEM_card";
+import { useNavigate } from "react-router-dom";
+import Loader from "../components/Loader";
 
-const available_colors = ["Red", "White", "Silver", "Black", "Blue","Green","Orange"];
+import {
+  select_delete_fail,
+  select_delete_req,
+  select_delete_success,
+  selectedDelete,
+} from "../redux/multipaldeletion/action";
+
+import { errorAlert, succesAlert } from "../components/Notifications";
+import { ToastContainer } from "react-toastify";
+import Cookies from "js-cookie";
+
+const available_colors = [
+  "Red",
+  "White",
+  "Silver",
+  "Black",
+  "Blue",
+  "Green",
+  "Orange",
+];
 
 const AllInventoryPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { data, isLoading, isError } = useSelector((store) => store.invetoryReducer);
+  const { data, isLoading, isError } = useSelector(
+    (store) => store.invetoryReducer
+  );
   const { oemdata, Loading, Error } = useSelector((store) => store.oemReducer);
   const loading = isLoading;
   const error = isError;
-  console.log(oemdata);
 
+  const idarray = useSelector((store) => store.idcollect_Reducer);
   const [filteredInventory, setFilteredInventory] = useState([]);
-  const [selectedColor, setSelectedColor] = useState('');
-  const [search, setsearch] = useState('');
+  const [selectedColor, setSelectedColor] = useState("");
+  const [search, setsearch] = useState("");
   const [update, setupdate] = useState(false);
-  const [sortOption, setSortOption] = useState('');
-  const [isDataLoaded, setIsDataLoaded] = useState(false); // New state variable to track data loading
+  const [sortOption, setSortOption] = useState("");
+  const [isDataLoaded, setIsDataLoaded] = useState(false); // New state
+ 
 
   const applyFilterAndSort = () => {
-    let query = '?';
+    let query = "?";
     if (selectedColor) {
+      query = "?"
       query += `filter=colors&order=${selectedColor}&`;
+      setSortOption("")
     }
     if (sortOption) {
-      const [filterBy, sortOrder] = sortOption.split('-');
+      setSelectedColor("")
+      query = "?"
+      const [filterBy, sortOrder] = sortOption.split("-");
       query += `filter=${filterBy}&order=${sortOrder}&`;
     }
 
-    if (query === '?') {
-      query = '';
+    if (query === "?") {
+      query = "";
     }
-
+console.log({query})
     dispatch(getInvetory(query));
   };
 
@@ -54,12 +83,11 @@ const AllInventoryPage = () => {
     // Fetch the necessary data on component mount
     dispatch(getOEM()).then(() => setIsDataLoaded(true));
     dispatch(getInvetory());
-    const userid=localStorage.getItem("userid");
-  const token=localStorage.getItem("token");
-  if(!userid|| !token){
-    navigate("/login")
-
-  }
+    const userid = Cookies.get("userId");
+    const token = Cookies.get("token");
+    if (!userid || !token) {
+      navigate("/login");
+    }
   }, []);
 
   useEffect(() => {
@@ -77,7 +105,23 @@ const AllInventoryPage = () => {
   const handleSortOptionChange = (e) => {
     setSortOption(e.target.value);
   };
+  const selectdeletehandle = async () => {
+    try {
+      dispatch(select_delete_req());
 
+      const res = await dispatch(selectedDelete(idarray.ids));
+      succesAlert(`${res.data.count}  ${res.data.msg}fully`);
+      dispatch(select_delete_success());
+      // dispatch(getInvetory());
+      dispatch(get_inv_success_prevent_reffresh(idarray.ids));
+    } catch (error) {
+      console.log(error);
+      dispatch(select_delete_fail());
+      errorAlert(
+        error?.response?.data?.msg || "something went wrong while deleting"
+      );
+    }
+  };
   const Addenvaintory = () => {
     navigate("/addinventory");
   };
@@ -88,8 +132,12 @@ const AllInventoryPage = () => {
 
   return (
     <div className={styles.main_Container}>
-      <div className={styles['filter-options']}>
-        <select value={selectedColor} onChange={(e) => handleColorFilter(e.target.value)}>
+      <ToastContainer />
+      <div className={styles["filter-options"]}>
+        <select
+          value={selectedColor}
+          onChange={(e) => handleColorFilter(e.target.value)}
+        >
           <option value="">Select Color</option>
           {available_colors.map((color) => (
             <option key={color} value={color}>
@@ -104,25 +152,74 @@ const AllInventoryPage = () => {
           <option value="mileage-asc">Mileage (Low to High)</option>
           <option value="mileage-desc">Mileage (High to Low)</option>
         </select>
-        <button onClick={Addenvaintory}>Add inventory</button>
-        <div style={{ display: "flex" }}>
-          <input style={{ width: "200px" }} onChange={(e) => setsearch(e.target.value)} type="text" placeholder='Search by model, color, and year' />
-          <button onClick={handlesearch}>Search</button>
+        
+        <div className={styles.buttons}>
+          <button onClick={Addenvaintory}>Add inventory</button>
+          {idarray.ids.length > 0 ? (
+            <button
+              style={{ backgroundColor: "red", color: "white" }}
+              onClick={selectdeletehandle}
+            >
+              delete selected
+            </button>
+          ) : (
+            ""
+          )}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: "20px",
+            float: "left",
+          }}
+        >
+          <input
+            style={{ maxWidth: "100px", textOverflow: "ellipsis" }}
+            onChange={(e) => setsearch(e.target.value)}
+            type="text"
+            placeholder="Search by model, color, and year"
+          />
+          <button style={{ width: "100px" }} onClick={handlesearch}>
+            Search
+          </button>
         </div>
       </div>
       {loading ? (
         <Loader />
       ) : (
         <>
-          {update ? <div style={{ display: "inline-block", float: "right", marginRight: "10px" }} ><button onClick={() => setupdate(false)}>close</button></div> : ""}
-          {oemdata.length > 0 && update ? <div className={styles.search}>
-            {oemdata.map((item) => <OEM_card key={item.id} {...item} />)}
-          </div> : ""}
-          <div>{oemdata.length < 0?<h1>Data note found..</h1>:""}</div>
-          <div className={styles['inventory-container']}>
+          {update ? (
+            <div
+              style={{
+                display: "inline-block",
+                float: "right",
+                marginRight: "10px",
+              }}
+            >
+              <button onClick={() => setupdate(false)}>close</button>
+            </div>
+          ) : (
+            ""
+          )}
+          {oemdata.length > 0 && update ? (
+            <div className={styles.search}>
+              {oemdata.map((item) => (
+                <OEM_card key={item.id} {...item} />
+              ))}
+            </div>
+          ) : (
+            ""
+          )}
+          <div>{oemdata.length < 0 ? <h1>Data note found..</h1> : ""}</div>
+          <div className={styles["inventory-container"]}>
             {filteredInventory ? (
               filteredInventory.map((item) => (
-                <InventoryCard key={item._id + Math.random().toLocaleString()} {...item} />
+                <InventoryCard
+                  key={item._id + Math.random().toLocaleString()}
+                  {...item}
+                />
               ))
             ) : (
               <div>No data to display.</div>

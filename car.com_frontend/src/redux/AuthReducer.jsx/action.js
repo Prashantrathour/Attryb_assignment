@@ -1,11 +1,11 @@
 // authActions.js
 
-export const loginSuccess = (userId, token) => {
+export const loginSuccess = (userId, token,username) => {
     return {
         type: 'LOGIN_SUCCESS',
         payload: {
           userId,
-          token,
+          token,username
         }
     }
     

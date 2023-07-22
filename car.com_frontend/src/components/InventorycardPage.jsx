@@ -5,16 +5,18 @@ import Popup from "reactjs-popup";
 import axios from "axios";
 
 
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import EditCarDetailsForm from "./InventoryFormControl";
 import { errorAlert, succesAlert } from "./Notifications";
-import { getInvetory } from "../redux/getInvetory/action";
+
+import { idcollection, idcollection_include } from "../redux/multipaldeletion/action";
+import Cookies from "js-cookie";
 
 const InventoryCardContainer = styled.div`
-  width: 300px;
- 
+  max-width: 300px;
+ max-height: 500px;
   border-radius: 8px;
-  padding: 16px;
+  padding: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease-in-out;
   overflow: hidden;
@@ -27,11 +29,12 @@ const InventoryCardContainer = styled.div`
 `;
 
 const InventoryImage = styled.img`
-  width: 100%;
-  height: 180px;
+  max-width: 300px;
+  height: 200px;
   object-fit: cover;
   border-radius: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+  overflow: hidden;
 `;
 
 const InventoryTitle = styled.h3`
@@ -131,7 +134,10 @@ const InventoryCard = ({
   img,
   title,
 }) => {
+  const idarray=useSelector((store)=>store.idcollect_Reducer)
+
   const [showDetails, setShowDetails] = useState(false);
+  
   const [showEditPopup, setShowEditPopup] = useState(false);
   const dispatch = useDispatch();
   const carDetails = {
@@ -148,7 +154,8 @@ const InventoryCard = ({
     img,
     title,
   };
-  const userid=localStorage.getItem("userid");
+  const userid=Cookies.get("userId");
+ 
   const handleToggleDetails = () => {
     setShowDetails(!showDetails);
   };
@@ -158,7 +165,7 @@ const InventoryCard = ({
   };
 
   const handleSaveEditedDetails = async (editedDetails) => {
-    const accessToken = localStorage.getItem("token");
+    const accessToken = Cookies.get("token");
     const config = {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -171,36 +178,24 @@ const InventoryCard = ({
         editedDetails,
         config
       );
-      console.log(res.data.msg);
+     
       succesAlert(res.data.msg);
       
     } catch (error) {
-      console.log(error);
+ 
       errorAlert("Something went wrong");
     }
     handleToggleEditPopup();
   };
 
   const handleDelete = async (id) => {
-    const accessToken = localStorage.getItem("token");
-    const config = {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    };
+    if(!idarray.ids.includes(id)){
+      dispatch(idcollection(id))
 
-    try {
-      const res = await axios.delete(
-        `${process.env.REACT_APP_BASEURL}/inventory/${id}`,
-        config
-      );
-      console.log(res.data.msg);
-     
-      dispatch(getInvetory(""));
-    } catch (error) {
-      console.log(error);
-      errorAlert("Something went wrong");
+    }else{
+      dispatch(idcollection_include(id))
     }
+ 
   };
 
   return (
@@ -226,7 +221,7 @@ const InventoryCard = ({
         </DetailsButton>
        {userid==userID? <CrudButtonContainer>
           <EditButton onClick={handleToggleEditPopup}>Edit</EditButton>
-          <DeleteButton onClick={() => handleDelete(_id)}>Delete</DeleteButton>
+          <DeleteButton  onClick={() => handleDelete(_id)}>{!idarray.ids.includes(_id)?"Select for Delete":"Selected"}</DeleteButton>
         </CrudButtonContainer>:""}
       </div>
 
@@ -289,10 +284,3 @@ const InventoryCard = ({
 
 export default InventoryCard;
 
-const Flex = styled.div`
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  margin: 1px;
-  margin-top: 10px;
-`;
