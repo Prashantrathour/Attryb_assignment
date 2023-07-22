@@ -3,8 +3,8 @@ import { GET_FAILURE_OEM, GET_REQUEST_OEM, GET_SUCCESS_OEM } from "./actiontype"
 import { Hearts } from "react-loader-spinner"
 
 export const getOEM=(query)=>async(dispatch)=>{
-    console.log('calling')
-const accessToken=localStorage.getItem("token")
+
+
 try {
     dispatch(get_oem_req())
     const headers={
@@ -14,7 +14,7 @@ try {
     
     const response=await axios.get(`${process.env.REACT_APP_BASEURL}/OEM_spaces/getspecs${query?`?search=${query}`:""}`,headers)
 dispatch(get_oem_success(response.data))
-console.log(response)
+
 } catch (error) {
    dispatch(get_oem_fail()) 
 }

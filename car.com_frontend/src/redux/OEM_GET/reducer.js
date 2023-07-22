@@ -13,7 +13,7 @@ switch (type) {
         
         return {...state, Loading:true}
     case GET_SUCCESS_OEM:
-        console.log(payload)
+    
         return {...state, Loading:false,oemdata:payload}
     case GET_FAILURE_OEM:
         

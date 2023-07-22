@@ -5,6 +5,7 @@ import Register from '../pages/UserRegsiterPage'
 import Login from '../pages/UserLoginPage'
 import AllInventoryPage from '../pages/InventoryPage'
 import AddInventoryPage from '../pages/AddinventoryPage'
+import PrivateRoute from './PrivateRoutes'
 
 function MainRoutes() {
   return (

@@ -5,10 +5,11 @@ import styles from "./addinvetory.css";
 import TableInvetories from "./TableInvetories";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { postInvetory, post_inv_req, post_inv_success } from "../redux/postInvetory/action";
+import { postInvetory, post_inv_req, post_inv_success, saveImageurl } from "../redux/postInvetory/action";
 import { errorAlert, succesAlert } from "../components/Notifications";
 
 import { ToastContainer } from "react-toastify";
+import FileUploader from "../components/FileUploader";
 
 const AddInventoryPage = () => {
 
@@ -22,7 +23,7 @@ const AddInventoryPage = () => {
   return (
     <Container>
       <Left>
-        <h2>All Inventories</h2>
+        <h2>All OEM Specs</h2>
         <TableInvetories />
       </Left>
       <Right>
@@ -35,19 +36,24 @@ const AddInventoryPage = () => {
 
 const Container = styled.div`
   display: flex;
-  width: 90%;
-  margin: auto;
+  width: 97%;
+  row-gap: 10px;
+ margin: 10px;
   box-sizing: border-box;
+  flex-wrap: wrap;
+justify-content: center;
 `;
 
 const Left = styled.div`
   flex: 1;
-  padding-right: 20px;
+  
+  width: 100%;
 `;
 
 const Right = styled.div`
   flex: 1;
-  padding-left: 20px;
+
+  width: 100%;
 `;
 
 export default AddInventoryPage;
@@ -57,6 +63,8 @@ const AddInventoryForm = () => {
   const dispatch=useDispatch()
   
   const { oemdata, Loading, Error } = useSelector((store) => store.oemReducer);
+  const {url}=useSelector((store)=>store.postinvetoryReducer)
+
   const { isLoading, isError } = useSelector((store) => store.postinvetoryReducer);
   const [formData, setFormData] = useState({});
   const [id, setid] = useState("");
@@ -67,22 +75,25 @@ const AddInventoryForm = () => {
 
   const handleSubmit = async(e) => {
     e.preventDefault();
+    if(url){
+      formData.img=url
+    
    try {
     dispatch(post_inv_req())
-    console.log(formData)
+
     const res=await dispatch(postInvetory(formData))
-    console.log(res)
+
     dispatch(post_inv_success())
     succesAlert(res.data.msg)
-    setTimeout(() => {
-      navigate("/")
-      
-    }, 4000);
+  dispatch(saveImageurl(""))
    } catch (error) {
-    console.log(error)
+
     errorAlert(error.response.data.msg)
    }
-   
+  }else{
+    errorAlert("image upload failed")
+    
+  }
   };
 useEffect(()=>{
   const userid=localStorage.getItem("userid");
@@ -94,7 +105,10 @@ useEffect(()=>{
 },[])
   return (
     <FormContainer>
-     
+     <FormGroup>
+          <Label>Image URL:</Label>
+          <FileUploader/>
+        </FormGroup>
       <Form onSubmit={handleSubmit}>
         <FormGroup>
           <Label>KM:</Label>
@@ -189,16 +203,7 @@ useEffect(()=>{
           </select>
         </FormGroup>
 
-        <FormGroup>
-          <Label>Image URL:</Label>
-          <Input
-            type="text"
-            name="img"
-            value={formData.img}
-            onChange={handleChange}
-            required
-          />
-        </FormGroup>
+        
 
         <FormGroup>
           <Label>Title:</Label>
@@ -213,6 +218,7 @@ useEffect(()=>{
 <ToastContainer/>
         <Button disabled={isLoading} type="submit">{!isLoading?"Add Inventory":"Loading..."}</Button>
       </Form>
+      
     </FormContainer>
   );
 };

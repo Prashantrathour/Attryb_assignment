@@ -76,6 +76,15 @@ const TableInvetories = () => {
 const Container = styled.div`
   width: 100%;
   margin: 0 auto;
+  display: flex;
+  flex-wrap:wrap;
+  justify-content: center;
+ .available-colors{
+  
+  display: flex;
+  justify-content: center;
+  
+ } 
 `;
 
 const SearchInput = styled.input`
@@ -90,12 +99,13 @@ const SearchInput = styled.input`
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
-
+  overflow: scroll;
   th,
   td {
     border: 1px solid #ccc;
     padding: 8px;
     text-align: left;
+    text-overflow: ellipsis;
   }
 
   th {
@@ -116,6 +126,8 @@ const ColorCircle = styled.div`
   height: 20px;
   border-radius: 50%;
   margin-right: 5px;
+border: 1px solid darkred;
+
 `;
 
 export default TableInvetories;

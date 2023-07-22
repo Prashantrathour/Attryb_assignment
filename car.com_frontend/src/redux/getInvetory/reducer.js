@@ -1,4 +1,4 @@
-import { GET_FAILURE, GET_REQUEST, GET_SUCCESS } from "./actiontype";
+import { GET_FAILURE, GET_REQUEST, GET_SUCCESS, GET_SUCCESS_PREVENT_REFFRESH } from "./actiontype";
 
 const initialState={
     data:[],
@@ -13,8 +13,11 @@ switch (type) {
         
         return {...state, isLoading:true}
     case GET_SUCCESS:
-        console.log(payload)
+        
         return {...state, isLoading:false,data:payload}
+    case GET_SUCCESS_PREVENT_REFFRESH:
+        const filterdata=state.data.filter((i)=>!payload.includes(i._id))
+        return {...state, isLoading:false,data:filterdata}
     case GET_FAILURE:
         
         return {...state, isLoading:false,isError:true}
