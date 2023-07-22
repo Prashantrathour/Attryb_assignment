@@ -21,13 +21,13 @@ OEM_SpecsRouter.get("/getspecs", async (req, res) => {
       }
 
       let specs = await oemModels.find(searchQuery);
-      res.status(200).send(specs);
+      res.status(200).json(specs);
     } else {
       let specs = await oemModels.find({});
-      res.send(specs);
+      res.json(specs);
     }
   } catch (error) {
-    res.send({ error });
+    res.status(404).send({msg:"Server error"})
   }
 });
 
