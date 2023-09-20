@@ -24,16 +24,17 @@ const Register = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-
+console.log(formData)
     try {
       const response = await axios.post(process.env.REACT_APP_BASEURL + "/users/register", formData);
+      console.log(response)
       setLoading(false);
       succesAlert("User Registered Please Login");
       navigate("/login")
     } catch (error) {
       setLoading(false);
-      errorAlert(error.response.data.msg);
-      console.error(error);
+      errorAlert(error?.response?.data?.msg);
+      console.log(error);
     }
   };
 
